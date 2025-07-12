@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Activity, Camera, Mic, Watch, ClipboardList, Brain } from 'lucide-react';
+import { Activity, Camera, Mic, Watch, ClipboardList, Brain, Bot } from 'lucide-react';
 
 interface NavigationProps {
   activeSection: string;
@@ -15,6 +15,7 @@ const navigationItems = [
   { id: 'physiological', label: 'Wearable', icon: Watch },
   { id: 'survey', label: 'Survey', icon: ClipboardList },
   { id: 'fusion', label: 'Results', icon: Brain },
+  { id: 'advisor', label: 'AI Advisor', icon: Bot },
 ];
 
 export const Navigation = ({ activeSection, onSectionChange }: NavigationProps) => {

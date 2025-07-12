@@ -6,6 +6,7 @@ import { AudioSection } from '@/components/sections/AudioSection';
 import { PhysiologicalSection } from '@/components/sections/PhysiologicalSection';
 import { SurveySection } from '@/components/sections/SurveySection';
 import { FusionSection } from '@/components/sections/FusionSection';
+import { AdvisorSection } from '@/components/sections/AdvisorSection';
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState('home');
@@ -24,6 +25,8 @@ const Index = () => {
         return <SurveySection />;
       case 'fusion':
         return <FusionSection />;
+      case 'advisor':
+        return <AdvisorSection />;
       default:
         return <HomeSection />;
     }
