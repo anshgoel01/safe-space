@@ -43,10 +43,51 @@ export const AdvisorSection = () => {
     }
   };
 
-  const generateMockStressData = (): StressData => {
-    const stressLevels: ('Low' | 'Moderate' | 'High')[] = ['Low', 'Moderate', 'High'];
+  const generateMockStressData = async (): Promise<StressData> => {
+    // Get ML predictions from our stress-prediction edge function
+    let mlPredictions;
+    try {
+      const response = await fetch('https://cpddakfcjkmhqindhmjn.supabase.co/functions/v1/stress-prediction', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          imageData: "mock_image_data", // In real app, this would be base64 image
+          audioData: "mock_audio_data", // In real app, this would be audio file
+          physiological: {
+            eda: Math.random() * 10 + 2,
+            bvp: Math.random() * 30 + 60,
+            temp: Math.random() * 5 + 35,
+            x: Math.random() * 2 - 1,
+            y: Math.random() * 2 - 1,
+            z: Math.random() * 2 - 1
+          },
+          surveyResponses: Array.from({length: 21}, () => Math.floor(Math.random() * 4)) // Random DASS-21 responses
+        })
+      });
+      
+      mlPredictions = await response.json();
+    } catch (error) {
+      console.error('Failed to get ML predictions:', error);
+      // Fallback to mock data
+      mlPredictions = {
+        fusion: { label: "Moderate", confidence: 0.6 },
+        individual: {
+          facial: { label: "Stressed", confidence: 0.7 },
+          audio: { label: "Not Stressed", confidence: 0.4 },
+          physiological: { label: "Stressed", confidence: 0.8 },
+          survey: { label: "Stressed", confidence: 0.6 }
+        }
+      };
+    }
+
+    const stressLevel = mlPredictions.fusion.label === "Stressed" 
+      ? (mlPredictions.fusion.confidence > 0.7 ? "High" : "Moderate")
+      : "Low";
+
     return {
-      stressLevel: stressLevels[Math.floor(Math.random() * 3)],
+      stressLevel: stressLevel as 'Low' | 'Moderate' | 'High',
       physiological: {
         eda: Math.random() * 10 + 2,
         bvp: Math.random() * 30 + 60,
@@ -57,11 +98,15 @@ export const AdvisorSection = () => {
       },
       surveyResponses: [
         "Feeling overwhelmed with work",
-        "Sleep quality has been poor",
+        "Sleep quality has been poor", 
         "Muscle tension in shoulders"
       ],
-      facialIndicators: "Increased eye strain, slight jaw tension detected",
-      vocalIndicators: "Elevated pitch variation, faster speech rate"
+      facialIndicators: mlPredictions.individual.facial.label === "Stressed" 
+        ? "Tension detected in facial muscles, reduced eye contact"
+        : "Relaxed facial expression detected",
+      vocalIndicators: mlPredictions.individual.audio.label === "Stressed"
+        ? "Elevated speech patterns, voice stress indicators detected"
+        : "Calm vocal patterns detected"
     };
   };
 
@@ -95,7 +140,7 @@ Provide supportive, actionable advice to help reduce stress. Be empathetic and c
     setLoading(true);
     setError('');
     
-    const stressData = generateMockStressData();
+    const stressData = await generateMockStressData();
     
     try {
       if (!apiKey.trim()) {
