@@ -26,66 +26,193 @@ interface SurveyResponse {
 
 const surveyQuestions: SurveyQuestion[] = [
   {
-    id: 'work_pressure',
-    question: 'How much pressure do you feel from your work right now?',
-    category: 'Workload',
+    id: 'q1',
+    question: 'I found it hard to wind down',
+    category: 'Stress',
     type: 'scale',
-    scaleMin: 1,
-    scaleMax: 10,
-    scaleLabels: { min: 'No pressure', max: 'Extreme pressure' }
+    scaleMin: 0,
+    scaleMax: 3,
+    scaleLabels: { min: 'Did not apply to me at all', max: 'Applied to me very much' }
   },
   {
-    id: 'time_pressure',
-    question: 'Do you feel rushed or pressured by time constraints?',
-    category: 'Time Management',
-    type: 'likert',
-    options: ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree']
-  },
-  {
-    id: 'emotional_exhaustion',
-    question: 'How emotionally drained do you feel at this moment?',
-    category: 'Emotional State',
+    id: 'q2',
+    question: 'I was aware of dryness of my mouth',
+    category: 'Anxiety',
     type: 'scale',
-    scaleMin: 1,
-    scaleMax: 7,
-    scaleLabels: { min: 'Not at all', max: 'Completely drained' }
+    scaleMin: 0,
+    scaleMax: 3,
+    scaleLabels: { min: 'Did not apply to me at all', max: 'Applied to me very much' }
   },
   {
-    id: 'concentration',
-    question: 'How difficult is it to concentrate on your tasks?',
-    category: 'Cognitive Function',
-    type: 'likert',
-    options: ['Very Easy', 'Easy', 'Moderate', 'Difficult', 'Very Difficult']
-  },
-  {
-    id: 'anxiety_level',
-    question: 'Rate your current anxiety level',
-    category: 'Emotional State',
+    id: 'q3',
+    question: "I couldn't seem to experience any positive feeling at all",
+    category: 'Depression',
     type: 'scale',
-    scaleMin: 1,
-    scaleMax: 10,
-    scaleLabels: { min: 'Completely calm', max: 'Extremely anxious' }
+    scaleMin: 0,
+    scaleMax: 3,
+    scaleLabels: { min: 'Did not apply to me at all', max: 'Applied to me very much' }
   },
   {
-    id: 'work_satisfaction',
-    question: 'How satisfied are you with your current work situation?',
-    category: 'Job Satisfaction',
-    type: 'likert',
-    options: ['Very Dissatisfied', 'Dissatisfied', 'Neutral', 'Satisfied', 'Very Satisfied']
+    id: 'q4',
+    question: 'I experienced breathing difficulty (e.g., rapid breathing)',
+    category: 'Anxiety',
+    type: 'scale',
+    scaleMin: 0,
+    scaleMax: 3,
+    scaleLabels: { min: 'Did not apply to me at all', max: 'Applied to me very much' }
   },
   {
-    id: 'physical_symptoms',
-    question: 'Are you experiencing any physical stress symptoms? (headache, tension, fatigue)',
-    category: 'Physical State',
-    type: 'likert',
-    options: ['None at all', 'Very mild', 'Mild', 'Moderate', 'Severe']
+    id: 'q5',
+    question: 'I found it difficult to work up the initiative to do things',
+    category: 'Depression',
+    type: 'scale',
+    scaleMin: 0,
+    scaleMax: 3,
+    scaleLabels: { min: 'Did not apply to me at all', max: 'Applied to me very much' }
   },
   {
-    id: 'support_system',
-    question: 'Do you feel you have adequate support to handle your current workload?',
-    category: 'Social Support',
-    type: 'likert',
-    options: ['Completely adequate', 'Mostly adequate', 'Somewhat adequate', 'Inadequate', 'Completely inadequate']
+    id: 'q6',
+    question: 'I tended to over-react to situations',
+    category: 'Stress',
+    type: 'scale',
+    scaleMin: 0,
+    scaleMax: 3,
+    scaleLabels: { min: 'Did not apply to me at all', max: 'Applied to me very much' }
+  },
+  {
+    id: 'q7',
+    question: 'I experienced trembling (e.g., in the hands)',
+    category: 'Anxiety',
+    type: 'scale',
+    scaleMin: 0,
+    scaleMax: 3,
+    scaleLabels: { min: 'Did not apply to me at all', max: 'Applied to me very much' }
+  },
+  {
+    id: 'q8',
+    question: 'I felt that I was using a lot of nervous energy',
+    category: 'Stress',
+    type: 'scale',
+    scaleMin: 0,
+    scaleMax: 3,
+    scaleLabels: { min: 'Did not apply to me at all', max: 'Applied to me very much' }
+  },
+  {
+    id: 'q9',
+    question: 'I was worried about situations in which I might panic',
+    category: 'Anxiety',
+    type: 'scale',
+    scaleMin: 0,
+    scaleMax: 3,
+    scaleLabels: { min: 'Did not apply to me at all', max: 'Applied to me very much' }
+  },
+  {
+    id: 'q10',
+    question: 'I felt that I had nothing to look forward to',
+    category: 'Depression',
+    type: 'scale',
+    scaleMin: 0,
+    scaleMax: 3,
+    scaleLabels: { min: 'Did not apply to me at all', max: 'Applied to me very much' }
+  },
+  {
+    id: 'q11',
+    question: 'I found myself getting agitated',
+    category: 'Stress',
+    type: 'scale',
+    scaleMin: 0,
+    scaleMax: 3,
+    scaleLabels: { min: 'Did not apply to me at all', max: 'Applied to me very much' }
+  },
+  {
+    id: 'q12',
+    question: 'I found it difficult to relax',
+    category: 'Stress',
+    type: 'scale',
+    scaleMin: 0,
+    scaleMax: 3,
+    scaleLabels: { min: 'Did not apply to me at all', max: 'Applied to me very much' }
+  },
+  {
+    id: 'q13',
+    question: 'I felt down-hearted and blue',
+    category: 'Depression',
+    type: 'scale',
+    scaleMin: 0,
+    scaleMax: 3,
+    scaleLabels: { min: 'Did not apply to me at all', max: 'Applied to me very much' }
+  },
+  {
+    id: 'q14',
+    question: 'I was intolerant of anything that kept me from getting on',
+    category: 'Stress',
+    type: 'scale',
+    scaleMin: 0,
+    scaleMax: 3,
+    scaleLabels: { min: 'Did not apply to me at all', max: 'Applied to me very much' }
+  },
+  {
+    id: 'q15',
+    question: 'I felt I was close to panic',
+    category: 'Anxiety',
+    type: 'scale',
+    scaleMin: 0,
+    scaleMax: 3,
+    scaleLabels: { min: 'Did not apply to me at all', max: 'Applied to me very much' }
+  },
+  {
+    id: 'q16',
+    question: 'I was unable to become enthusiastic about anything',
+    category: 'Depression',
+    type: 'scale',
+    scaleMin: 0,
+    scaleMax: 3,
+    scaleLabels: { min: 'Did not apply to me at all', max: 'Applied to me very much' }
+  },
+  {
+    id: 'q17',
+    question: "I felt I wasn't worth much as a person",
+    category: 'Depression',
+    type: 'scale',
+    scaleMin: 0,
+    scaleMax: 3,
+    scaleLabels: { min: 'Did not apply to me at all', max: 'Applied to me very much' }
+  },
+  {
+    id: 'q18',
+    question: 'I felt that I was rather touchy',
+    category: 'Stress',
+    type: 'scale',
+    scaleMin: 0,
+    scaleMax: 3,
+    scaleLabels: { min: 'Did not apply to me at all', max: 'Applied to me very much' }
+  },
+  {
+    id: 'q19',
+    question: 'I was aware of the action of my heart in the absence of physical exertion (e.g., sense of heart rate increase)',
+    category: 'Anxiety',
+    type: 'scale',
+    scaleMin: 0,
+    scaleMax: 3,
+    scaleLabels: { min: 'Did not apply to me at all', max: 'Applied to me very much' }
+  },
+  {
+    id: 'q20',
+    question: 'I felt scared without any good reason',
+    category: 'Anxiety',
+    type: 'scale',
+    scaleMin: 0,
+    scaleMax: 3,
+    scaleLabels: { min: 'Did not apply to me at all', max: 'Applied to me very much' }
+  },
+  {
+    id: 'q21',
+    question: 'I felt that life was meaningless',
+    category: 'Depression',
+    type: 'scale',
+    scaleMin: 0,
+    scaleMax: 3,
+    scaleLabels: { min: 'Did not apply to me at all', max: 'Applied to me very much' }
   }
 ];
 
@@ -124,29 +251,14 @@ export const SurveySection = () => {
   const calculateStressLevel = () => {
     if (responses.length !== surveyQuestions.length) return null;
 
-    // Calculate weighted stress score
-    let totalScore = 0;
-    let maxPossibleScore = 0;
-
-    responses.forEach(response => {
-      const question = surveyQuestions.find(q => q.id === response.questionId);
-      if (question) {
-        if (question.type === 'likert') {
-          totalScore += (response.value / 5) * 10; // Normalize to 0-10
-          maxPossibleScore += 10;
-        } else {
-          const normalizedScore = ((response.value - (question.scaleMin || 1)) / 
-                                  ((question.scaleMax || 10) - (question.scaleMin || 1))) * 10;
-          totalScore += normalizedScore;
-          maxPossibleScore += 10;
-        }
-      }
-    });
-
-    const stressPercentage = (totalScore / maxPossibleScore) * 100;
+    // Calculate DASS-21 score (sum of all responses)
+    const totalScore = responses.reduce((sum, response) => sum + response.value, 0);
     
-    if (stressPercentage <= 30) return 'Low';
-    if (stressPercentage <= 65) return 'Medium';
+    // DASS-21 stress classification (multiply by 2 for full scale equivalent)
+    const stressScore = totalScore * 2;
+    
+    if (stressScore <= 14) return 'Low';
+    if (stressScore <= 25) return 'Medium';
     return 'High';
   };
 
@@ -283,8 +395,8 @@ export const SurveySection = () => {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="text-3xl font-bold text-foreground mb-2 font-poppins">Self-Assessment Survey</h2>
-        <p className="text-muted-foreground">WorkStress3D instant questionnaire for current stress state</p>
+        <h2 className="text-3xl font-bold text-foreground mb-2 font-poppins">DASS-21 Assessment</h2>
+        <p className="text-muted-foreground">Depression, Anxiety and Stress Scale - 21 Questions</p>
       </div>
 
       {/* Progress */}
@@ -353,20 +465,22 @@ export const SurveySection = () => {
                     <span>{currentQuestion.scaleLabels?.max}</span>
                   </div>
                   
-                  <div className="grid grid-cols-10 gap-2">
-                    {Array.from({ length: currentQuestion.scaleMax || 10 }, (_, index) => {
-                      const value = (currentQuestion.scaleMin || 1) + index;
+                  <div className="grid grid-cols-4 gap-2">
+                    {Array.from({ length: 4 }, (_, index) => {
+                      const value = index;
+                      const labels = ['Never', 'Sometimes', 'Often', 'Almost Always'];
                       return (
                         <button
                           key={value}
                           onClick={() => handleResponse(currentQuestion.id, value)}
-                          className={`aspect-square rounded-lg border-2 transition-all font-bold
+                          className={`p-3 rounded-lg border-2 transition-all font-medium text-sm
                             ${currentResponse?.value === value
                               ? 'border-primary bg-primary text-primary-foreground shadow-glow'
                               : 'border-border hover:border-primary/50'
                             }`}
                         >
-                          {value}
+                          <div className="font-bold text-lg">{value}</div>
+                          <div className="text-xs opacity-80">{labels[index]}</div>
                         </button>
                       );
                     })}

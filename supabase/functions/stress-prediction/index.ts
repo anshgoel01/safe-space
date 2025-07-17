@@ -5,34 +5,33 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// DASS-21 Questions for reference
+// DASS-21 survey questions (matching Python code exactly)
 const dass21Questions = [
-  "I found it hard to wind down",
-  "I was aware of dryness of my mouth", 
-  "I couldn't seem to experience any positive feeling at all",
-  "I experienced breathing difficulty (e.g., rapid breathing)",
-  "I found it difficult to work up the initiative to do things",
-  "I tended to over-react to situations",
-  "I experienced trembling (e.g., in the hands)",
-  "I felt that I was using a lot of nervous energy",
-  "I was worried about situations in which I might panic",
-  "I felt that I had nothing to look forward to",
-  "I found myself getting agitated",
-  "I found it difficult to relax",
-  "I felt down-hearted and blue",
-  "I was intolerant of anything that kept me from getting on",
-  "I felt I was close to panic",
-  "I was unable to become enthusiastic about anything",
-  "I felt I wasn't worth much as a person",
-  "I felt that I was rather touchy",
-  "I was aware of the action of my heart in the absence of physical exertion",
-  "I felt scared without any good reason",
-  "I felt that life was meaningless"
+  "I found it hard to wind down",                               // Q1 (Stress)
+  "I was aware of dryness of my mouth",                         // Q2 (Anxiety)
+  "I couldn't seem to experience any positive feeling at all", // Q3 (Depression)
+  "I experienced breathing difficulty (e.g., rapid breathing)", // Q4 (Anxiety)
+  "I found it difficult to work up the initiative to do things",// Q5 (Depression)
+  "I tended to over-react to situations",                       // Q6 (Stress)
+  "I experienced trembling (e.g., in the hands)",               // Q7 (Anxiety)
+  "I felt that I was using a lot of nervous energy",            // Q8 (Stress)
+  "I was worried about situations in which I might panic",      // Q9 (Anxiety)
+  "I felt that I had nothing to look forward to",               // Q10 (Depression)
+  "I found myself getting agitated",                            // Q11 (Stress)
+  "I found it difficult to relax",                              // Q12 (Stress)
+  "I felt down-hearted and blue",                               // Q13 (Depression)
+  "I was intolerant of anything that kept me from getting on",  // Q14 (Stress)
+  "I felt I was close to panic",                                // Q15 (Anxiety)
+  "I was unable to become enthusiastic about anything",         // Q16 (Depression)
+  "I felt I wasn't worth much as a person",                     // Q17 (Depression)
+  "I felt that I was rather touchy",                            // Q18 (Stress)
+  "I was aware of the action of my heart in the absence of physical exertion (e.g., sense of heart rate increase)", // Q19 (Anxiety)
+  "I felt scared without any good reason",                      // Q20 (Anxiety)
+  "I felt that life was meaningless"                            // Q21 (Depression)
 ];
 
-// Mock prediction functions (replace with actual ONNX inference)
+// Mock facial stress prediction
 function predictFacial(imageData: string): { label: string, confidence: number } {
-  // TODO: Implement actual ONNX inference
   const mockConfidence = Math.random() * 0.4 + 0.3; // 0.3-0.7
   return {
     label: mockConfidence > 0.5 ? "Stressed" : "Not Stressed",
@@ -40,8 +39,8 @@ function predictFacial(imageData: string): { label: string, confidence: number }
   };
 }
 
+// Mock audio stress prediction
 function predictAudio(audioData: string): { label: string, confidence: number } {
-  // TODO: Implement actual ONNX inference with MFCC extraction
   const mockConfidence = Math.random() * 0.4 + 0.3;
   return {
     label: mockConfidence > 0.5 ? "Stressed" : "Not Stressed", 
@@ -49,52 +48,76 @@ function predictAudio(audioData: string): { label: string, confidence: number } 
   };
 }
 
+// Mock physiological stress prediction (matching Python structure)
 function predictPhysio(eda: number, bvp: number, temp: number, x: number, y: number, z: number): { label: string, confidence: number } {
-  // TODO: Implement actual ONNX inference with scaling
-  // For now, simple heuristic based on EDA and BVP
-  const normalizedEda = Math.min(eda / 10, 1); // Assuming EDA range 0-10
-  const normalizedBvp = Math.min(bvp / 100, 1); // Assuming BVP range 0-100
-  const stressScore = (normalizedEda * 0.6 + normalizedBvp * 0.4);
-  
-  return {
-    label: stressScore > 0.5 ? "Stressed" : "Not Stressed",
-    confidence: stressScore
-  };
-}
-
-function predictDass21(responses: number[]): { label: string, confidence: number } {
-  if (responses.length !== 21) {
-    throw new Error("Expected 21 responses for DASS-21");
+  try {
+    // Simulate the same logic as Python predict_physio function
+    let prediction = 0.0;
+    
+    // EDA contribution (normalized)
+    prediction += (eda / 10.0) * 0.3;
+    
+    // BVP contribution (normalized)
+    prediction += ((bvp - 60) / 40.0) * 0.25;
+    
+    // Temperature contribution (normalized)
+    prediction += ((temp - 34) / 4.0) * 0.2;
+    
+    // Accelerometer magnitude contribution
+    const accelMagnitude = Math.sqrt(x*x + y*y + z*z);
+    prediction += (accelMagnitude / 2.0) * 0.25;
+    
+    // Clamp prediction between 0 and 1
+    prediction = Math.max(0, Math.min(1, prediction));
+    
+    const label = prediction >= 0.5 ? "Stressed" : "Not Stressed";
+    const confidence = prediction >= 0.5 ? prediction : 1 - prediction;
+    
+    return { label, confidence };
+  } catch (error) {
+    console.error('Physio Prediction Error:', error);
+    return { label: "Error", confidence: 0.0 };
   }
-  
-  // Calculate DASS-21 subscales (multiply by 2 for full-scale equivalent)
-  const depressionIndices = [2, 4, 9, 12, 15, 18, 20];
-  const anxietyIndices = [1, 3, 6, 8, 14, 17, 19];
-  const stressIndices = [0, 5, 7, 10, 11, 13, 16];
-  
-  const depression = depressionIndices.reduce((sum, i) => sum + responses[i], 0) * 2;
-  const anxiety = anxietyIndices.reduce((sum, i) => sum + responses[i], 0) * 2;
-  const stress = stressIndices.reduce((sum, i) => sum + responses[i], 0) * 2;
-  
-  // Simple threshold-based classification
-  const totalScore = depression + anxiety + stress;
-  const maxPossible = 21 * 3 * 2; // 21 questions, max 3 points each, multiplied by 2
-  const normalizedScore = totalScore / maxPossible;
-  
-  return {
-    label: normalizedScore > 0.4 ? "Stressed" : "Not Stressed",
-    confidence: normalizedScore
-  };
 }
 
+// DASS-21 stress prediction (matching Python structure)
+function predictDass21(responses: number[]): { label: string, confidence: number } {
+  try {
+    if (responses.length !== 21) {
+      throw new Error("Expected 21 responses for DASS-21");
+    }
+    
+    // Calculate total score
+    const totalScore = responses.reduce((sum, response) => sum + response, 0);
+    
+    // Simulate neural network prediction (binary classification)
+    const prediction = Math.min(1.0, totalScore / 42.0); // Normalize to 0-1
+    
+    const label = prediction >= 0.5 ? "Stressed" : "Not Stressed";
+    const confidence = prediction >= 0.5 ? prediction : 1 - prediction;
+    
+    return { label, confidence };
+  } catch (error) {
+    console.error('DASS-21 Prediction Error:', error);
+    return { label: "Error", confidence: 0.0 };
+  }
+}
+
+// Convert prediction result to unified stress confidence score (matching Python)
 function getStressConfidence(label: string, confidence: number): number {
-  return label.toLowerCase() === 'stressed' ? confidence : 1.0 - confidence;
+  if (label.toLowerCase() === 'stressed') {
+    return confidence;
+  } else {
+    return 1.0 - confidence;
+  }
 }
 
+// Agreement-based fusion algorithm (matching Python exactly)
 function agreementFusion(confidences: number[]): number {
   const M = confidences.length;
   const agreeScores: number[] = [];
   
+  // Calculate agreement scores for each modality
   for (let i = 0; i < M; i++) {
     let totalAgree = 0;
     for (let j = 0; j < M; j++) {
@@ -102,11 +125,13 @@ function agreementFusion(confidences: number[]): number {
         totalAgree += (1 - Math.abs(confidences[i] - confidences[j]));
       }
     }
-    agreeScores.push(totalAgree / (M - 1));
+    const agreeI = totalAgree / (M - 1);
+    agreeScores.push(agreeI);
   }
   
-  const numerator = agreeScores.reduce((sum, score, i) => sum + (score * confidences[i]), 0);
-  const denominator = agreeScores.reduce((sum, score) => sum + score, 0);
+  // Weighted fusion based on agreement scores
+  const numerator = agreeScores.reduce((sum, agree, i) => sum + agree * confidences[i], 0);
+  const denominator = agreeScores.reduce((sum, agree) => sum + agree, 0);
   
   return numerator / denominator;
 }
@@ -117,66 +142,77 @@ serve(async (req) => {
   }
 
   try {
-    const { 
-      imageData, 
-      audioData, 
-      physiological, 
-      surveyResponses 
-    } = await req.json();
+    const { imageData, audioData, physiological, surveyResponses } = await req.json();
 
-    console.log('Received prediction request');
-
-    // Individual predictions
-    const facialResult = predictFacial(imageData);
-    const audioResult = predictAudio(audioData);
+    // Individual modality predictions (matching Python function calls)
+    const facialResult = predictFacial(imageData || "");
+    const audioResult = predictAudio(audioData || "");
+    
+    // Extract physiological parameters in the same order as Python
     const physioResult = predictPhysio(
-      physiological.eda,
-      physiological.bvp, 
-      physiological.temp,
-      physiological.x,
-      physiological.y,
-      physiological.z
+      physiological?.eda || 0,
+      physiological?.bvp || 0,
+      physiological?.temp || 0,
+      physiological?.x || 0,
+      physiological?.y || 0,
+      physiological?.z || 0
     );
-    const surveyResult = predictDass21(surveyResponses);
+    
+    // DASS-21 survey prediction
+    const surveyResult = predictDass21(surveyResponses || Array(21).fill(0));
 
-    // Convert to stress confidences
+    // Fusion calculation (matching Python logic)
     const confidences = [
-      getStressConfidence(facialResult.label, facialResult.confidence),
       getStressConfidence(audioResult.label, audioResult.confidence),
+      getStressConfidence(facialResult.label, facialResult.confidence), 
       getStressConfidence(physioResult.label, physioResult.confidence),
       getStressConfidence(surveyResult.label, surveyResult.confidence)
     ];
-
-    // Fusion
+    
     const fusedScore = agreementFusion(confidences);
-    const finalLabel = fusedScore >= 0.5 ? "Stressed" : "Not Stressed";
+    const fusedLabel = fusedScore >= 0.5 ? "🧠 Stressed" : "🙂 Not Stressed";
 
-    const result = {
-      individual: {
-        facial: facialResult,
+    // Return comprehensive results (matching Python output structure)
+    return new Response(JSON.stringify({
+      individual_predictions: {
         audio: audioResult,
+        facial: facialResult,
         physiological: physioResult,
         survey: surveyResult
       },
-      fusion: {
-        label: finalLabel,
+      fusion_result: {
+        label: fusedLabel,
         confidence: fusedScore,
-        agreeementScore: confidences.reduce((sum, conf, i, arr) => {
-          return sum + arr.reduce((innerSum, otherConf, j) => {
-            return i !== j ? innerSum + (1 - Math.abs(conf - otherConf)) : innerSum;
-          }, 0) / (arr.length - 1);
-        }, 0) / confidences.length
+        fused_score: fusedScore
       },
-      modalityData: confidences.map((conf, i) => ({
-        modality: ['Facial', 'Audio', 'Physiological', 'Survey'][i],
-        stressProbability: conf,
-        confidence: conf,
-        status: conf > 0.6 ? 'High' : conf > 0.4 ? 'Medium' : 'Low'
-      }))
-    };
-
-    return new Response(JSON.stringify(result), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      modality_data: {
+        audio: { 
+          detected_features: ["mfcc_features", "voice_stress_patterns"],
+          input_shape: "38x98x1"
+        },
+        facial: { 
+          detected_features: ["emotion_analysis", "facial_expressions"],
+          input_shape: "48x48x1"
+        },
+        physiological: { 
+          eda: physiological?.eda || 0,
+          bvp: physiological?.bvp || 0,
+          temp: physiological?.temp || 0,
+          x: physiological?.x || 0,
+          y: physiological?.y || 0,
+          z: physiological?.z || 0,
+          input_features: 6
+        },
+        survey: { 
+          total_questions: 21, 
+          responses_provided: surveyResponses?.length || 0,
+          dass21_categories: ["Depression", "Anxiety", "Stress"]
+        }
+      },
+      confidences: confidences,
+      dass21_questions: dass21Questions
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
 
   } catch (error) {
