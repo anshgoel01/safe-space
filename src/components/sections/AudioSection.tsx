@@ -21,15 +21,18 @@ export const AudioSection = () => {
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         audio: {
-          sampleRate: 44100,
+          sampleRate: 22050,
           channelCount: 1,
           echoCancellation: true,
-          noiseSuppression: true
+          noiseSuppression: true,
+          autoGainControl: true
         }
       });
 
       // Setup audio analysis
-      const audioContext = new AudioContext();
+      const audioContext = new AudioContext({ sampleRate: 22050 });
+      await audioContext.resume(); // Ensure audio context is running
+      
       const analyser = audioContext.createAnalyser();
       const source = audioContext.createMediaStreamSource(mediaStream);
       
@@ -39,8 +42,26 @@ export const AudioSection = () => {
       audioContextRef.current = audioContext;
       analyserRef.current = analyser;
 
-      // Setup media recorder
-      const mediaRecorder = new MediaRecorder(mediaStream);
+      // Setup media recorder with proper MIME type
+      const mediaRecorder = new MediaRecorder(mediaStream, {
+        mimeType: 'audio/webm;codecs=opus'
+      });
+      
+      const audioChunks: Blob[] = [];
+      
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunks.push(event.data);
+        }
+      };
+      
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        // Save for later use
+        console.log('Audio recording saved:', audioBlob);
+      };
+      
+      mediaRecorder.start(1000); // Record in 1-second chunks
       mediaRecorderRef.current = mediaRecorder;
 
       setStream(mediaStream);
@@ -68,6 +89,7 @@ export const AudioSection = () => {
         description: "Audio stress analysis is now active",
       });
     } catch (error) {
+      console.error('Audio recording error:', error);
       toast({
         title: "Microphone access denied",
         description: "Please allow microphone access for voice stress detection",

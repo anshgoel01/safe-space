@@ -8,8 +8,9 @@ import { useToast } from '@/hooks/use-toast';
 export const FacialSection = () => {
   const [isStreaming, setIsStreaming] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
-  const [isRecording, setIsRecording] = useState(false);
+  const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const { toast } = useToast();
 
   const startCamera = async () => {
@@ -27,7 +28,7 @@ export const FacialSection = () => {
       
       toast({
         title: "Camera activated",
-        description: "Facial expression analysis is now active",
+        description: "Ready to capture photo for facial analysis",
       });
     } catch (error) {
       toast({
@@ -43,7 +44,6 @@ export const FacialSection = () => {
       stream.getTracks().forEach(track => track.stop());
       setStream(null);
       setIsStreaming(false);
-      setIsRecording(false);
       
       if (videoRef.current) {
         videoRef.current.srcObject = null;
@@ -51,28 +51,38 @@ export const FacialSection = () => {
       
       toast({
         title: "Camera deactivated",
-        description: "Facial expression analysis stopped",
+        description: "Facial analysis stopped",
       });
     }
   };
 
-  const toggleRecording = () => {
-    if (!isStreaming) {
+  const capturePhoto = () => {
+    if (!isStreaming || !videoRef.current || !canvasRef.current) {
       toast({
         title: "Start camera first",
-        description: "Please activate the camera before recording",
+        description: "Please activate the camera before capturing photo",
         variant: "destructive",
       });
       return;
     }
+
+    const canvas = canvasRef.current;
+    const video = videoRef.current;
+    const context = canvas.getContext('2d');
     
-    setIsRecording(!isRecording);
-    toast({
-      title: isRecording ? "Recording stopped" : "Recording started",
-      description: isRecording 
-        ? "Facial expression data collection paused" 
-        : "Now collecting facial expression data for analysis",
-    });
+    if (context) {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      context.drawImage(video, 0, 0);
+      
+      const photoDataUrl = canvas.toDataURL('image/jpeg');
+      setCapturedPhoto(photoDataUrl);
+      
+      toast({
+        title: "Photo captured",
+        description: "Facial expression photo saved for analysis",
+      });
+    }
   };
 
   useEffect(() => {
@@ -122,70 +132,63 @@ export const FacialSection = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="relative bg-muted rounded-lg overflow-hidden">
-              {isStreaming ? (
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  playsInline
-                  muted
-                  className="w-full h-64 object-cover"
-                />
-              ) : (
-                <div className="w-full h-64 flex items-center justify-center bg-muted">
-                  <div className="text-center">
-                    <CameraOff className="w-16 h-16 text-muted-foreground mx-auto mb-2" />
-                    <p className="text-muted-foreground">Camera not active</p>
-                  </div>
-                </div>
-              )}
-              
-              {isRecording && (
-                <div className="absolute top-4 right-4">
-                  <div className="flex items-center gap-2 bg-destructive text-destructive-foreground px-3 py-1 rounded-full">
-                    <div className="w-2 h-2 bg-current rounded-full animate-pulse" />
-                    <span className="text-sm font-medium">REC</span>
-                  </div>
-                </div>
-              )}
-            </div>
-            
-            <div className="flex gap-2 mt-4">
-              <Button
-                variant={isStreaming ? "destructive" : "default"}
-                onClick={isStreaming ? stopCamera : startCamera}
-                className="flex-1"
-              >
-                {isStreaming ? (
-                  <>
-                    <CameraOff className="w-4 h-4 mr-2" />
-                    Stop Camera
-                  </>
+            <div className="space-y-4">
+              <div className="relative bg-muted rounded-lg overflow-hidden">
+                {capturedPhoto ? (
+                  <img
+                    src={capturedPhoto}
+                    alt="Captured facial expression"
+                    className="w-full h-64 object-cover"
+                  />
+                ) : isStreaming ? (
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    className="w-full h-64 object-cover"
+                  />
                 ) : (
-                  <>
-                    <Camera className="w-4 h-4 mr-2" />
-                    Start Camera
-                  </>
+                  <div className="w-full h-64 flex items-center justify-center bg-muted">
+                    <div className="text-center">
+                      <CameraOff className="w-16 h-16 text-muted-foreground mx-auto mb-2" />
+                      <p className="text-muted-foreground">Camera not active</p>
+                    </div>
+                  </div>
                 )}
-              </Button>
+              </div>
               
-              <Button
-                variant={isRecording ? "destructive" : "secondary"}
-                onClick={toggleRecording}
-                disabled={!isStreaming}
-              >
-                {isRecording ? (
-                  <>
-                    <Square className="w-4 h-4 mr-2" />
-                    Stop
-                  </>
-                ) : (
-                  <>
-                    <Play className="w-4 h-4 mr-2" />
-                    Record
-                  </>
-                )}
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant={isStreaming ? "destructive" : "default"}
+                  onClick={isStreaming ? stopCamera : startCamera}
+                  className="flex-1"
+                >
+                  {isStreaming ? (
+                    <>
+                      <CameraOff className="w-4 h-4 mr-2" />
+                      Stop Camera
+                    </>
+                  ) : (
+                    <>
+                      <Camera className="w-4 h-4 mr-2" />
+                      Start Camera
+                    </>
+                  )}
+                </Button>
+                
+                <Button
+                  variant="secondary"
+                  onClick={capturePhoto}
+                  disabled={!isStreaming}
+                  className="flex-1"
+                >
+                  <Camera className="w-4 h-4 mr-2" />
+                  Capture Photo
+                </Button>
+              </div>
+              
+              <canvas ref={canvasRef} style={{ display: 'none' }} />
             </div>
           </CardContent>
         </Card>

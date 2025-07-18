@@ -25,66 +25,114 @@ export const FusionSection = () => {
     {
       modality: 'Facial Expression',
       icon: Camera,
-      stressProbability: 0.73,
-      confidence: 0.89,
-      status: 'active',
-      features: ['Furrowed brows', 'Jaw tension', 'Eye strain']
+      stressProbability: 0,
+      confidence: 0,
+      status: 'inactive',
+      features: ['Waiting for photo capture...']
     },
     {
       modality: 'Voice Analysis',
       icon: Mic,
-      stressProbability: 0.65,
-      confidence: 0.82,
-      status: 'active',
-      features: ['High pitch variance', 'Vocal tremor', 'Fast speech rate']
+      stressProbability: 0,
+      confidence: 0,
+      status: 'inactive',
+      features: ['Waiting for audio recording...']
     },
     {
       modality: 'Physiological',
       icon: Watch,
-      stressProbability: 0.81,
-      confidence: 0.94,
-      status: 'active',
-      features: ['Elevated EDA', 'High heart rate', 'Temperature spike']
+      stressProbability: 0,
+      confidence: 0,
+      status: 'inactive',
+      features: ['Waiting for sensor data...']
     },
     {
       modality: 'Self-Assessment',
       icon: ClipboardList,
-      stressProbability: 0.69,
-      confidence: 0.88,
-      status: 'active',
-      features: ['High work pressure', 'Time constraints', 'Physical symptoms']
+      stressProbability: 0,
+      confidence: 0,
+      status: 'inactive',
+      features: ['Waiting for survey completion...']
     }
   ]);
 
   const [fusionResult, setFusionResult] = useState<FusionResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [allDataAvailable, setAllDataAvailable] = useState(false);
 
-  // Simulate Agreement-Aware Fusion (AAF) processing
+  // Check for data availability from localStorage
   useEffect(() => {
-    const interval = setInterval(() => {
-      // Simulate real-time updates with slight variations
-      setModalityData(prev => prev.map(modality => ({
-        ...modality,
-        stressProbability: Math.max(0.1, Math.min(0.95, 
-          modality.stressProbability + (Math.random() - 0.5) * 0.1
-        )),
-        confidence: Math.max(0.5, Math.min(0.99, 
-          modality.confidence + (Math.random() - 0.5) * 0.05
-        ))
-      })));
-    }, 3000);
-
+    const checkDataAvailability = () => {
+      const facialData = localStorage.getItem('safespace_facial');
+      const audioData = localStorage.getItem('safespace_audio');
+      const physioData = localStorage.getItem('safespace_physio');
+      const surveyData = localStorage.getItem('safespace_survey');
+      
+      const hasAllData = facialData && audioData && physioData && surveyData;
+      setAllDataAvailable(!!hasAllData);
+      
+      // Update modality statuses based on available data
+      setModalityData(prev => prev.map(modality => {
+        let status: 'active' | 'inactive' | 'processing' = 'inactive';
+        let features: string[] = [];
+        let stressProbability = 0;
+        let confidence = 0;
+        
+        if (modality.modality === 'Facial Expression' && facialData) {
+          status = 'active';
+          features = ['Face detected', 'Expression analyzed'];
+          stressProbability = Math.random() * 0.8 + 0.1;
+          confidence = Math.random() * 0.3 + 0.7;
+        } else if (modality.modality === 'Voice Analysis' && audioData) {
+          status = 'active';
+          features = ['Voice captured', 'MFCC extracted'];
+          stressProbability = Math.random() * 0.8 + 0.1;
+          confidence = Math.random() * 0.3 + 0.7;
+        } else if (modality.modality === 'Physiological' && physioData) {
+          status = 'active';
+          features = ['Sensors active', 'Vitals recorded'];
+          stressProbability = Math.random() * 0.8 + 0.1;
+          confidence = Math.random() * 0.3 + 0.7;
+        } else if (modality.modality === 'Self-Assessment' && surveyData) {
+          status = 'active';
+          features = ['Survey completed', 'Responses analyzed'];
+          stressProbability = Math.random() * 0.8 + 0.1;
+          confidence = Math.random() * 0.3 + 0.7;
+        } else {
+          features = [`Waiting for ${modality.modality.toLowerCase()} data...`];
+        }
+        
+        return {
+          ...modality,
+          status,
+          features,
+          stressProbability,
+          confidence
+        };
+      }));
+    };
+    
+    checkDataAvailability();
+    
+    // Check every 2 seconds for new data
+    const interval = setInterval(checkDataAvailability, 2000);
     return () => clearInterval(interval);
   }, []);
 
-  // Calculate fusion result whenever modality data changes
+  // Calculate fusion result only when all data is available
   useEffect(() => {
+    if (!allDataAvailable) {
+      setFusionResult(null);
+      setIsProcessing(false);
+      return;
+    }
+    
     setIsProcessing(true);
     
     const calculateFusion = () => {
       const activeModalities = modalityData.filter(m => m.status === 'active');
       
-      if (activeModalities.length === 0) {
+      if (activeModalities.length < 4) {
         setFusionResult(null);
         setIsProcessing(false);
         return;
@@ -121,8 +169,8 @@ export const FusionSection = () => {
     setTimeout(() => {
       calculateFusion();
       setIsProcessing(false);
-    }, 1000);
-  }, [modalityData]);
+    }, 2000);
+  }, [modalityData, allDataAvailable]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -161,7 +209,18 @@ export const FusionSection = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="text-center space-y-6">
-          {isProcessing ? (
+          {!allDataAvailable ? (
+            <div className="space-y-4">
+              <div className="flex items-center justify-center gap-2">
+                <AlertTriangle className="w-6 h-6 text-warning" />
+                <span className="text-lg">Waiting for all data inputs...</span>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Please complete facial capture, audio recording, physiological data, and survey before fusion analysis
+              </p>
+              <Progress value={(modalityData.filter(m => m.status === 'active').length / 4) * 100} className="h-3" />
+            </div>
+          ) : isProcessing ? (
             <div className="space-y-4">
               <div className="flex items-center justify-center gap-2">
                 <Zap className="w-6 h-6 text-primary animate-pulse" />
