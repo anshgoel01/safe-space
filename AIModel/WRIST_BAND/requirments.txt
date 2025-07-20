@@ -1,0 +1,9 @@
+ArduinoJson by Benoit Blanchon
+
+PulseSensor Playground by World Famous Electronics
+
+SparkFun MAX3010x Pulse and Proximity Sensor Library by SparkFun Electronics
+
+OneWire by Paul Stoffregen
+
+DallasTemperature by Miles Burton
