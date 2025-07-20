@@ -1,0 +1,25 @@
+# Core Machine Learning & Data
+tensorflow
+numpy
+scikit-learn
+pandas
+
+# Audio & Signal Processing
+librosa
+openai-whisper
+
+# Web Interface & API
+gradio
+requests
+
+# Hardware Communication
+pyserial
+
+# Image Processing
+opencv-python-headless
+
+# Text-to-Speech
+gTTS
+
+# Utility
+joblib
